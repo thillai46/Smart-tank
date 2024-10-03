@@ -1,0 +1,49 @@
+#define TRIGGER_PIN 9
+#define ECHO_PIN 10
+#define PUMP_PIN 7
+#define FLOAT_SENSOR_PIN 2
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(TRIGGER_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(PUMP_PIN, OUTPUT);
+  pinMode(FLOAT_SENSOR_PIN, INPUT);
+}
+
+void loop() {
+  long duration, distance;
+
+  // Measure water level using ultrasonic sensor
+  digitalWrite(TRIGGER_PIN, LOW);
+  delay(2);
+  digitalWrite(TRIGGER_PIN, HIGH);
+  delay(10);
+  digitalWrite(TRIGGER_PIN, LOW);
+  
+  duration = pulseIn(ECHO_PIN, HIGH);
+  distance = (duration * 0.034) / 2; // Distance in cm
+
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Define water level thresholds
+  const int lowWaterLevel = 20; // cm
+  const int highWaterLevel = 10; // cm
+
+  // Check float sensor status if used
+  int floatSensorStatus = digitalRead(FLOAT_SENSOR_PIN);
+
+  if (distance > lowWaterLevel && floatSensorStatus == LOW) {
+    // Water level is low, turn on the pump
+    digitalWrite(PUMP_PIN, HIGH);
+    Serial.println("Pump ON");
+  } else if (distance < highWaterLevel) {
+    // Water level is high enough, turn off the pump
+    digitalWrite(PUMP_PIN, LOW);
+    Serial.println("Pump OFF");
+  }
+
+  delay(1000); // Wait 1 second before next reading
+}
